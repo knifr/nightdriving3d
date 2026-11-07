@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from dotenv import load_dotenv
 
 from keep_alive import keep_alive
@@ -14,7 +14,6 @@ from keep_alive import keep_alive
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GIF_URL = os.getenv("GIF_URL", "")
 GAME_URL = os.getenv("GAME_URL", "https://t.me/nightdriving3d_bot?startapp=game_heart")
 
 logging.basicConfig(
@@ -49,16 +48,23 @@ def game_keyboard() -> InlineKeyboardMarkup:
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
-    if GIF_URL.startswith("http"):
+    # Указываем путь к локальному файлу
+    gif_path = "nightdrive.gif"
+    
+    if os.path.exists(gif_path):
         try:
+            # Загружаем локальный файл
+            animation = FSInputFile(gif_path)
             await message.answer_animation(
-                animation=GIF_URL,
+                animation=animation,
                 caption=CAPTION,
                 reply_markup=game_keyboard(),
             )
             return
         except Exception as e:
-            logging.warning(f"Не удалось отправить GIF: {e}")
+            logging.warning(f"Не удалось отправить локальный GIF: {e}")
+    
+    # Если файла нет или произошла ошибка — отправляем просто текст
     await message.answer(text=CAPTION, reply_markup=game_keyboard())
 
 
@@ -76,7 +82,7 @@ async def cmd_health(message: Message):
 
 
 async def main():
-    keep_alive()  # поднимаем HTTP-сервер для Render
+    keep_alive()  # Поднимаем HTTP-сервер для Render
     logging.info("Bot starting...")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
