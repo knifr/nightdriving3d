@@ -6,11 +6,9 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: python bot.py
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: BOT_TOKEN
-        sync: false          # задашь вручную в дашборде Render
-      - key: GIF_URL
         sync: false
       - key: GAME_URL
         value: https://t.me/nightdriving3d_bot?startapp=game_heart
-      - key: PYTHON_VERSION
-        value: "3.11.9"
